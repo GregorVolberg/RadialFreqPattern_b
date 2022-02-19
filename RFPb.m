@@ -108,7 +108,7 @@ try
         bphi = randsample(-pi:pi,1); % random phase
         sizeFact = randsample(0.7:0.1:1,1); % random phase
         [~, ~, Rbase] = generate_wave(br0*sizeFact, bA, conmat(trial, 4), bnodd, bphi); % base            
-        [x, y, ~]     = generate_wave(Rbase, A, conmat(trial, 5), conmat(trial,2), phi); 
+        [x, y, ~]     = generate_waveRFPb(Rbase, A, conmat(trial, 5), conmat(trial,2), phi); 
         % use "plot(x, y);" to plot on command line
         polygon = round([x + width/2; y + height/2])';
         Screen('FramePoly', win, [0 0 0], polygon, penwidth);
@@ -169,10 +169,10 @@ end
 function [conmat] = get_conmat()
 % 6nodd * 2wavef * 2bfreq * 2frq * 3audiofrq = 144; 
 % bei 4 Durchgängen pro bedingung: 576 trials, 48 pro RFP*audio
-nodd  = repelem(0:5, 96); % odd harmonics, spikeness, 0:1:5
+nodd  = repelem([0, 0.4, 0.8, 1.2, 1.6, 3], 96); % odd harmonics, spikeness, 0:1:5
 wavef = repmat(repelem(1:2, 48), 1, 6); % 1 = sine, 2 = triangle
 bfrq  = repmat(repelem([3, 4], 24), 1, 12); % freq of Rbase, 3 or 4
-frq   = repmat(repelem([15, 25],12), 1, 24); % freq of RFP, 20 or 30
+frq   = repmat(repelem([16, 20],12), 1, 24); % freq of RFP
 audi  = repmat(repelem([2000, 2200, 2400], 4), 1, 48); % audio frequency, 2000 2200 2400
 conmat = [1:length(nodd); nodd; wavef; bfrq; frq; audi]';
 end
@@ -197,33 +197,6 @@ else
 end
 snd = repmat(snd',2,1); % for PsychAudio
 end
-
-% function [snd] = generate_sounds(snd_order, duration, Freq, fade, betw_pause, Fs)
-% % nur zwei sounds, sin und tria
-% % order: 1 = sin zuerst, 2 = tria zuerst 
-% % s_length = länge des sound samples, pro wellenform, in sec
-% % freq: zB 2000, 2250, 2500
-% % fade-in und fade-out, in sec
-% % pause: pause zwischen sounds, in sec
-% %Fs       = 44000;
-% 
-% t         = (0:(1/Fs):duration-(1/Fs))';
-% fade_samp = length((0:(1/Fs):fade-(1/Fs)));
-% fadefunc  = ones(length(t), 1);
-% fadefunc(1:fade_samp) = linspace(0, 1, fade_samp);
-% fadefunc(end-fade_samp+1:end) = linspace(1, 0, fade_samp);
-% 
-% sinwave = sin(2*pi*Freq*t) .* fadefunc;
-% sawwave = sawtooth(2*pi*Freq*t, 1) .* fadefunc;
-% paus    = zeros(Fs * betw_pause, 1);
-% if snd_order == 1
-%     snd = [sinwave; paus; sawwave];
-% elseif snd_order == 2
-%     snd = [sawwave; paus; sinwave];
-% end
-% 
-% end
-
 
 function [escpress] = show_instruction(windowPointer, instTexture, run_mode, blocknum)
        if run_mode == 1
