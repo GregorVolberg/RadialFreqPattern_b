@@ -8,7 +8,7 @@ switch MonitorSelection
     MonitorSpecs.yResolution = 1440;  % y resolution
     MonitorSpecs.refresh     = 120;  % refresh rate
     MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
-    case 2 % alter Belinea-Monitor Büro
+    case 2 % alter Belinea-Monitor Bï¿½ro
     MonitorSpecs.width     = 390; % in mm
     MonitorSpecs.height    = 290; % in mm
     MonitorSpecs.distance  = 600; % in mm
@@ -16,7 +16,7 @@ switch MonitorSelection
     MonitorSpecs.yResolution = 1024;  % y resolution
     MonitorSpecs.refresh     = 60;  % refresh rate
     MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
-    case 3 % neuer Monitor Büro, Dell P2210
+    case 3 % neuer Monitor Bï¿½ro, Dell P2210
     MonitorSpecs.width     = 470; % in mm
     MonitorSpecs.height    = 295; % in mm
     MonitorSpecs.distance  = 600; % in mm
@@ -43,5 +43,14 @@ switch MonitorSelection
     MonitorSpecs.refresh     = 60;  % refresh rate
     MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
     MonitorSpecs.ScreenNumber    = 0;
-end
+    case 6 % Dell-Latitude 6320
+    MonitorSpecs.width     = 290; % in mm
+    MonitorSpecs.height    = 165; % in mm
+    MonitorSpecs.distance  = 600;%810; % in mm
+    MonitorSpecs.xResolution = 1366; % x resolution
+    MonitorSpecs.yResolution = 768;  % y resolution
+    MonitorSpecs.refresh     = 60;  % refresh rate
+    MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
+    MonitorSpecs.ScreenNumber    = 0;
+    end
 end

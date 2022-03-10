@@ -8,7 +8,7 @@
 % =======================
 
 function[outmat] = RFPb(run_mode)
-Screen('Preference', 'SkipSyncTests', 1);
+Screen('Preference', 'SkipSyncTests', 0);
 
 % run_mode = 1; normal experiment
 % run_mode = 2; demo with 10 blocks
@@ -16,23 +16,24 @@ if ~ismember(run_mode, [1 2])
     error('Wrong runmode argument\n'); end
 
 % set up paths, responses, monitor, ...
-addpath('./func');
+rootDir = pwd;
+addpath([rootDir, '/func']);
 isOctave = check_octave;
 %rawdir = [cd, '\raw\'];
 if isOctave
-rawdir = [cd, '/raw/'];
+rawdir = [rootDir, '/raw/'];
 else 
 rawdir = [cd, '\raw\'];
 end
 
-[vp, response_mapping, instruct] = get_experimentInfo(run_mode);
+[vp, response_mapping, instruct] = get_experimentInfo(run_mode, rootDir);
 [TastenVector, response_keys] = prepare_responseKeys(response_mapping); % manual responses
-MonitorSelection = 3;
+MonitorSelection = 6;
 MonitorSpecs = getMonitorSpecs(MonitorSelection); % subfunction, gets specification for monitor
 
 %% sound generation 
 fade       = 0.02; %fade-in, fade-out
-%Freq       = 2200; %in Hz, über conmat!
+%Freq       = 2200; %in Hz, ï¿½ber conmat!
 duration   = 0.8;
 %betw_pause = 0.4;
 Fs         = 44000; % sampling freq
@@ -140,6 +141,9 @@ try
     RFP.date    = tstring;
     RFP.block   = blocknum;
     RFP.outmat  = outmat;
+    RFP.resolution = [width, height];
+    RFP.hz        = hz;
+    RFP.pc        = gethostname;
     RFP.experiment = 'RFPb';
     RFP.isOctave = isOctave;
     
@@ -150,14 +154,19 @@ try
   else
     save([rawdir, 'demo'], 'RFP');
         escpress = 1;
+        PsychPortAudio('Close', pahandle);
     end
     
     end % while
 catch
+    PsychPortAudio('Close');
     Screen('CloseAll');
     psychrethrow(psychlasterror);
+       
 end
+PsychPortAudio('Close');
 Screen('CloseAll');
+
 end
 
 %% =================== subfunctions =========
@@ -221,12 +230,13 @@ KEYvec = indi(i); % key, aufsteigend nach Zeit
 RTvec  = TimeVector(indi(i)); % rt, aufsteigend nach Zeit, relativ zum letzte KbEventFlush
 % stop experiment if ESC is pressed
     if ismember(KbName('ESCAPE'), KEYvec) %ESC-taste
+      PsychPortAudio('Close');
        sca; end
 end
 
 
 
-function [vp, response_mapping, instruct] = get_experimentInfo(run_mode)
+function [vp, response_mapping, instruct] = get_experimentInfo(run_mode, rootDir)
 if run_mode == 1
   fprintf('\nParticipant (three characters, e.g. S01)?\n');
   vp = input('EINGABE: ', 's');
@@ -243,9 +253,9 @@ end
 
 switch response_mapping
     case  1
-        instruct = imread('./org/instruction_mapping1.png');
+        instruct = imread([rootDir, '/instruction_mapping1.png']);
     case  2
-        instruct = imread('./org/instruction_mapping2.png');
+        instruct = imread([rootDir, '/instruction_mapping2.png']);
 end
 instruct = 255-instruct; instruct(instruct == 255) = 127;
 end
