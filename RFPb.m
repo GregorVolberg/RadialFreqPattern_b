@@ -1,15 +1,14 @@
 % =======================
-% function[] = RFPa(run_mode)
+% function[] = RFPb(run_mode)
 % map tone to figure
 % figures are RFPs (varying spikness)
 % tones are pure sine and triangular waves
 %
-% GV 04.10.2021
-% weighted average over two waveforms to reveal 1.5, 1.7 etc harmonics
+% Now contains weighted average over two waveforms to reveal 1.5, 1.7 etc harmonics
 % =======================
 
-function[outmat] = RFPa(run_mode)
-Screen('Preference', 'SkipSyncTests', 0);
+function[outmat] = RFPb(run_mode)
+Screen('Preference', 'SkipSyncTests', 1);
 
 % run_mode = 1; normal experiment
 % run_mode = 2; demo with 10 blocks
@@ -18,7 +17,14 @@ if ~ismember(run_mode, [1 2])
 
 % set up paths, responses, monitor, ...
 addpath('./func');
+isOctave = check_octave;
+%rawdir = [cd, '\raw\'];
+if isOctave
+rawdir = [cd, '/raw/'];
+else 
 rawdir = [cd, '\raw\'];
+end
+
 [vp, response_mapping, instruct] = get_experimentInfo(run_mode);
 [TastenVector, response_keys] = prepare_responseKeys(response_mapping); % manual responses
 MonitorSelection = 3;
@@ -71,7 +77,7 @@ try
     [win, ~] = Screen('OpenWindow', MonitorSpecs.ScreenNumber, 127); 
 
     Screen('BlendFunction', win, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    [width, height] = Screen('WindowSize', win);
+    [width, height] = Screen('WindowSize', win)
     hz = Screen('NominalFrameRate', win);
     Screen('Flip', win);
     Screen('TextSize', win, 25); %fontsize 34
@@ -110,7 +116,7 @@ try
         [~, ~, Rbase] = generate_wave(br0*sizeFact, bA, conmat(trial, 4), bnodd, bphi); % base            
         [x, y, ~]     = generate_waveRFPb(Rbase, A, conmat(trial, 5), conmat(trial,2), phi); 
         % use "plot(x, y);" to plot on command line
-        polygon = round([x + width/2; y + height/2])';
+        polygon = round([x + width/2, y + height/2]);
         Screen('FramePoly', win, [0 0 0], polygon, penwidth);
         
         % present stimuli
@@ -128,18 +134,21 @@ try
         
         end
         
-    RFP = [];
-    RFP.vp     = vp;
+    RFP         = [];
+    RFP.vp      = vp;
     RFP.mapping = response_mapping;
     RFP.date    = tstring;
     RFP.block   = blocknum;
-    RFP.outmat = outmat;
+    RFP.outmat  = outmat;
+    RFP.experiment = 'RFPb';
+    RFP.isOctave = isOctave;
     
     
     if run_mode == 1
     save([rawdir, outfilename], 'RFP');
     escpress = show_instruction(win, instTexture, run_mode, blocknum);
-    else
+  else
+    save([rawdir, 'demo'], 'RFP');
         escpress = 1;
     end
     
@@ -166,16 +175,6 @@ isRound = key_code == response_keys(1);
 end
 
 
-function [conmat] = get_conmat()
-% 6nodd * 2wavef * 2bfreq * 2frq * 3audiofrq = 144; 
-% bei 4 Durchgängen pro bedingung: 576 trials, 48 pro RFP*audio
-nodd  = repelem([0, 0.4, 0.8, 1.2, 1.6, 3], 96); % odd harmonics, spikeness, 0:1:5
-wavef = repmat(repelem(1:2, 48), 1, 6); % 1 = sine, 2 = triangle
-bfrq  = repmat(repelem([3, 4], 24), 1, 12); % freq of Rbase, 3 or 4
-frq   = repmat(repelem([16, 20],12), 1, 24); % freq of RFP
-audi  = repmat(repelem([2000, 2200, 2400], 4), 1, 48); % audio frequency, 2000 2200 2400
-conmat = [1:length(nodd); nodd; wavef; bfrq; frq; audi]';
-end
 
 
 
@@ -226,60 +225,15 @@ RTvec  = TimeVector(indi(i)); % rt, aufsteigend nach Zeit, relativ zum letzte Kb
 end
 
 
-function [MonitorSpecs] = getMonitorSpecs(MonitorSelection)
-switch MonitorSelection
-    case 1 % Dell-Monitor EEG-Labor
-    MonitorSpecs.width     = 530; % in mm
-    MonitorSpecs.height    = 295; % in mm
-    MonitorSpecs.distance  = 600;%810; % in mm
-    MonitorSpecs.xResolution = 2560; % x resolution
-    MonitorSpecs.yResolution = 1440;  % y resolution
-    MonitorSpecs.refresh     = 120;  % refresh rate
-    MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
-    case 2 % alter Belinea-Monitor Büro
-    MonitorSpecs.width     = 390; % in mm
-    MonitorSpecs.height    = 290; % in mm
-    MonitorSpecs.distance  = 600; % in mm
-    MonitorSpecs.xResolution = 1280; % x resolution
-    MonitorSpecs.yResolution = 1024;  % y resolution
-    MonitorSpecs.refresh     = 60;  % refresh rate
-    MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
-    case 3 % neuer Monitor Büro, Dell P2210
-    MonitorSpecs.width     = 470; % in mm
-    MonitorSpecs.height    = 295; % in mm
-    MonitorSpecs.distance  = 600; % in mm
-    MonitorSpecs.xResolution = 1680; % x resolution
-    MonitorSpecs.yResolution = 1050;  % y resolution
-    MonitorSpecs.refresh     = 60;  % refresh rate
-    MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
-    MonitorSpecs.ScreenNumber    = 2;
-    case 4 % Monitor Home Office, LG 24BK750Y-B, 24-inch
-    MonitorSpecs.width     = 530; % in mm
-    MonitorSpecs.height    = 295; % in mm
-    MonitorSpecs.distance  = 600; % in mm
-    MonitorSpecs.xResolution = 1920; % x resolution
-    MonitorSpecs.yResolution = 1080;  % y resolution
-    MonitorSpecs.refresh     = 60;  % refresh rate
-    MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
-    MonitorSpecs.ScreenNumber    = 1;
-    case 5 % Alex Notebook HP Elitebook 850 6G
-    MonitorSpecs.width     = 345; % in mm
-    MonitorSpecs.height    = 195; % in mm
-    MonitorSpecs.distance  = 600; % in mm
-    MonitorSpecs.xResolution = 1920; % x resolution
-    MonitorSpecs.yResolution = 1080;  % y resolution
-    MonitorSpecs.refresh     = 60;  % refresh rate
-    MonitorSpecs.PixelsPerDegree = round((2*(tan(2*pi/360*(1/2))*MonitorSpecs.distance))/(MonitorSpecs.width / MonitorSpecs.xResolution)); % pixel per degree of visual angle
-    MonitorSpecs.ScreenNumber    = 0;
-end
-end
 
 function [vp, response_mapping, instruct] = get_experimentInfo(run_mode)
 if run_mode == 1
-  vp = input('\nParticipant (three characters, e.g. S01)? ', 's');
+  fprintf('\nParticipant (three characters, e.g. S01)?\n');
+  vp = input('EINGABE: ', 's');
     if length(vp)~=3 
        error ('Wrong input!'); end
-    response_mapping = str2num(input('\nResponse mapping?\n1: y = rund, m = spitz\n2: y = spitz, m = rund\n', 's'));    
+    fprintf('\nResponse mapping?\n1: y = rund,  m = spitz\n2: y = spitz, m = rund\n');   
+    response_mapping = str2num(input('EINGABE (1 oder 2): ', 's'));    
       if ~ismember(response_mapping, [1, 2])
         error('\nUnknown mapping!'); end
 else
@@ -289,9 +243,9 @@ end
 
 switch response_mapping
     case  1
-        instruct = imread('instruction_mapping1.png');
+        instruct = imread('./org/instruction_mapping1.png');
     case  2
-        instruct = imread('instruction_mapping2.png');
+        instruct = imread('./org/instruction_mapping2.png');
 end
 instruct = 255-instruct; instruct(instruct == 255) = 127;
 end
