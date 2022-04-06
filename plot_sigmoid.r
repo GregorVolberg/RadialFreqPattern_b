@@ -14,10 +14,8 @@ trialsPerPerson = ds %>%
   group_by(vp) %>%
   summarize(nperP = length(vp)) %>%
   ungroup()
-# S09 is only one block
+# V07 is only 480 trials (statt 576)
 
-cat('\nAchtung! S09 wird entfernt\n\n')
-ds = ds %>% filter(vp != 'S09')
 vpnames = unique(ds$vp)
 
 # get fraction 'spiky' responses  
@@ -32,7 +30,7 @@ prz2all = ds %>% group_by(vp, nodd, waveform) %>%
        ungroup()
 
 for (k in 1:length(vpnames)){
-PngFileName = paste(PngPath, 'RFPa-', vpnames[k], '.png', sep = '')
+PngFileName = paste(PngPath, 'RFPb-', vpnames[k], '.png', sep = '')
 png(filename = PngFileName,
     width  = 360,
     height = 360)
@@ -45,7 +43,7 @@ z_spike = qnorm(spike)
 erg = lm(z_spike ~ prz1$nodd)
 m = -(coef(erg)[1])/coef(erg)[2]
 s = 1 / coef(erg)[2]
-curve(pnorm(x,m,s), 0,5, col = 'red', xlim=c(0,5), ylim=c(0,1), ylab = 'p spiky', xlab = 'n odd-symmetrics', lwd=2)
+curve(pnorm(x,m,s), 0,3, col = 'red', xlim=c(0,3), ylim=c(0,1), ylab = 'p spiky', xlab = 'n odd-symmetrics', lwd=2)
 points(prz1$nodd, prz1$f_spikey, col='red', cex=2)
 
 prz2  = prz2all %>% filter(vp == vpnames[k])
@@ -56,7 +54,7 @@ z_spike = qnorm(spike)
 erg = lm(z_spike ~ prz2$nodd)
 m = -(coef(erg)[1])/coef(erg)[2]
 s = 1 / coef(erg)[2]
-curve(pnorm(x,m,s), 0,5, col = 'blue', xlim=c(0,5), ylim=c(0,1), add=T, lwd=2)
+curve(pnorm(x,m,s), 0,3, col = 'blue', xlim=c(0,3), ylim=c(0,1), add=T, lwd=2)
 points(prz1$nodd, prz2$f_spikey, col='blue', cex=2)
 
 text(2.5,0.1, vpnames[k])
