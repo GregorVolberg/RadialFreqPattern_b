@@ -14,7 +14,7 @@ trialsPerPerson = ds %>%
   group_by(vp) %>%
   summarize(nperP = length(vp)) %>%
   ungroup()
-# V07 is only 480 trials (statt 576)
+
 
 vpnames = unique(ds$vp)
 
@@ -63,3 +63,4 @@ dev.off()
 }
 
 
+# V10, 13 , 15 auf Rateniveau
